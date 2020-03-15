@@ -50,7 +50,7 @@
 
 #define APP_FEATURE_NOT_SUPPORTED       BLE_GATT_STATUS_ATTERR_APP_BEGIN + 2        /**< Reply when unsupported features are requested. */
 
-#define DEVICE_NAME                     "Core52_BLE_UART"                               /**< Name of device. Will be included in the advertising data. */
+#define DEVICE_NAME                     "Core52-BleUart"                               /**< Name of device. Will be included in the advertising data. */
 #define NUS_SERVICE_UUID_TYPE           BLE_UUID_TYPE_VENDOR_BEGIN                  /**< UUID type for the Nordic UART Service (vendor specific). */
 
 #define APP_BLE_OBSERVER_PRIO           3                                           /**< Application's BLE observer priority. You shouldn't need to modify this value. */
@@ -78,7 +78,7 @@ const nrf_drv_timer_t TIMER_UART_RX = NRF_DRV_TIMER_INSTANCE(2);					/**< Timer 
 static uint8_t 	UART_RX_BUF[UART_RX_BUF_SIZE] = {0};					  			/**< uart receive buffer. */	
 static uint16_t UART_RX_STA = 0;
 
-static uint8_t 	device_name[15] = "Core52_BLE_UART";
+static uint8_t 	device_name[sizeof (DEVICE_NAME)] = DEVICE_NAME;
 
 APP_TIMER_DEF(wdt_feed_timer_id);													/**< WDT feed delay timer instance. */
 BLE_NUS_DEF(m_nus);                                                                 /**< BLE NUS service instance. */
@@ -1017,7 +1017,7 @@ static uint32_t uart_init(uint32_t baudrate)
                        uart_event_handler,
                        APP_IRQ_PRIORITY_LOWEST,
                        err_code);
-//    APP_ERROR_CHECK(err_code);
+    APP_ERROR_CHECK(err_code);
 	return err_code;
 }
 /**@snippet [UART Initialization] */
