@@ -1102,23 +1102,22 @@ static void power_manage(void)
 void timer_uart_rx_timeout_event_handler(nrf_timer_event_t event_type, void* p_context)
 {
 	uint32_t err_code;
-	uint8_t tmp[sizeof(UART_RX_BUF)]={0};
 	nrf_drv_timer_disable(&TIMER_UART_RX);
 	
     switch (event_type)
     {
         case NRF_TIMER_EVENT_COMPARE0:
-					memcpy(tmp,UART_RX_BUF,sizeof(UART_RX_BUF));
-					if(AT_cmd_check_valid(tmp, UART_RX_STA))  // AT command
+					if(AT_cmd_check_valid(UART_RX_BUF, UART_RX_STA))  // AT command
 					{
-						AT_cmd_handle(tmp, UART_RX_STA);
+						AT_cmd_handle(UART_RX_BUF, UART_RX_STA);
 					}
 					else  // Pass-through data
 					{
-						err_code = ble_send_data(tmp, UART_RX_STA);
+						err_code = ble_send_data(UART_RX_BUF, UART_RX_STA);
 						NRF_LOG_INFO("first_send,err_code:%x", err_code);
 						printf("AT+ERR=%d\r\n",err_code);
 					}
+					memset(UART_RX_BUF,0,UART_RX_STA);
 					UART_RX_STA=0;
           break;
         default:

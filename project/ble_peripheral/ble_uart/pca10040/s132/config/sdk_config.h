@@ -275,7 +275,7 @@
  
 
 #ifndef BLE_NUS_C_ENABLED
-#define BLE_NUS_C_ENABLED 0
+#define BLE_NUS_C_ENABLED 1
 #endif
 
 // <q> BLE_NUS_ENABLED  - ble_nus - Nordic UART Service
@@ -503,7 +503,7 @@
 // <7=> 7 
 
 #ifndef CLOCK_CONFIG_IRQ_PRIORITY
-#define CLOCK_CONFIG_IRQ_PRIORITY 7
+#define CLOCK_CONFIG_IRQ_PRIORITY 6
 #endif
 
 // </e>
@@ -2010,7 +2010,7 @@
 // <7=> 7 
 
 #ifndef WDT_CONFIG_IRQ_PRIORITY
-#define WDT_CONFIG_IRQ_PRIORITY 7
+#define WDT_CONFIG_IRQ_PRIORITY 0
 #endif
 
 // </e>
