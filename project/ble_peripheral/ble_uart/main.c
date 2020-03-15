@@ -150,6 +150,10 @@ static uint32_t send_data(void)
 		{ 
 			start += temp_len;
 		}
+		else if(err_code == BLE_CONN_HANDLE_INVALID)
+		{
+			break;
+		}
 	} while((NRF_SUCCESS == err_code) && ((max_len - start) > 0)); 
 
 	g_send_msg.start = start;
@@ -1098,27 +1102,25 @@ static void power_manage(void)
 void timer_uart_rx_timeout_event_handler(nrf_timer_event_t event_type, void* p_context)
 {
 	uint32_t err_code;
-	
+	uint8_t tmp[sizeof(UART_RX_BUF)]={0};
 	nrf_drv_timer_disable(&TIMER_UART_RX);
 	
     switch (event_type)
     {
         case NRF_TIMER_EVENT_COMPARE0:
-			if(AT_cmd_check_valid(UART_RX_BUF, UART_RX_STA))  // AT command
-			{
-				AT_cmd_handle(UART_RX_BUF, UART_RX_STA);
-			}
-			else  // Pass-through data
-			{
-				err_code = ble_send_data(UART_RX_BUF, UART_RX_STA);
-				NRF_LOG_INFO("first_send,err_code:%x", err_code);
-				APP_ERROR_CHECK(err_code);
-			}
-
-			
-			UART_RX_STA=0;
-            break;
-
+					memcpy(tmp,UART_RX_BUF,sizeof(UART_RX_BUF));
+					if(AT_cmd_check_valid(tmp, UART_RX_STA))  // AT command
+					{
+						AT_cmd_handle(tmp, UART_RX_STA);
+					}
+					else  // Pass-through data
+					{
+						err_code = ble_send_data(tmp, UART_RX_STA);
+						NRF_LOG_INFO("first_send,err_code:%x", err_code);
+						printf("AT+ERR=%d\r\n",err_code);
+					}
+					UART_RX_STA=0;
+          break;
         default:
             //Do nothing.
             break;
@@ -1198,10 +1200,10 @@ int main(void)
     // Initialize.
     timers_init();
 	
-	timer_uart_rx_timeout_init();
+	  timer_uart_rx_timeout_init();
 
     err_code = uart_init(UART_BAUDRATE_BAUDRATE_Baud115200);
-	APP_ERROR_CHECK(err_code);
+	  APP_ERROR_CHECK(err_code);
 	
     log_init();
 
@@ -1213,11 +1215,8 @@ int main(void)
     advertising_init();
     conn_params_init();
 	
-	 wdt_init();
-	 wdt_feed_timers_start();
-
-    printf("\r\nAT+RESET:OK\r\n");
-    NRF_LOG_INFO("BLE_UART Start!");
+	  wdt_init();
+	  wdt_feed_timers_start();
 	
     err_code = ble_advertising_start(&m_advertising, BLE_ADV_MODE_FAST);
     APP_ERROR_CHECK(err_code);
@@ -1225,8 +1224,6 @@ int main(void)
     // Enter main loop.
     for (;;)
     {
-//        UNUSED_RETURN_VALUE(NRF_LOG_PROCESS());
-		
         if (NRF_LOG_PROCESS() == false)
         {
             power_manage();
